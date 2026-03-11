@@ -33,13 +33,20 @@ document.getElementById('clearAuthBtn').addEventListener('click', () => {
 });
 
 document.getElementById('previewBtn').addEventListener('click', () => {
+    // 1. 연도 입력값을 가져옵니다.
+    const year = parseInt(document.getElementById('lunarYear').value);
     const month = parseInt(document.getElementById('lunarMonth').value);
     const day = parseInt(document.getElementById('lunarDay').value);
     const isLeap = document.getElementById('isLeap').checked;
     const count = parseInt(document.getElementById('repeatYears').value) || 10;
-    if (!month || !day) return alert("날짜를 입력하세요.");
-    cachedDates = getSolarDates(month, day, isLeap, count);
-    document.getElementById('previewList').innerHTML = "<strong>변환 결과:</strong><br>" + cachedDates.join('<br>');
+
+    if (!year || !month || !day) return alert("날짜를 입력하세요.");
+
+    // 2. getSolarDates 함수에 연도(year)를 첫 번째 인자로 전달합니다.
+    cachedDates = getSolarDates(year, month, day, isLeap, count);
+    
+    const previewDiv = document.getElementById('previewList');
+    previewDiv.innerHTML = "<strong>변환 결과:</strong><br>" + cachedDates.join('<br>');
 });
 
 document.getElementById('syncBtn').addEventListener('click', async () => {
