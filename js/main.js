@@ -1,65 +1,57 @@
 // js/main.js
-document.getElementById('convertBtn').addEventListener('click', () => {
-    // 1. 입력값 가져오기
-    const title = document.getElementById('eventTitle').value;
+let cachedDates = [];
+let foundEvents = [];
+
+// 미리보기 버튼
+document.getElementById('previewBtn').addEventListener('click', () => {
     const month = parseInt(document.getElementById('lunarMonth').value);
     const day = parseInt(document.getElementById('lunarDay').value);
     const isLeap = document.getElementById('isLeap').checked;
     const count = parseInt(document.getElementById('repeatYears').value) || 10;
 
-    // 2. 유효성 검사
-    if (!title) {
-        alert("일정 제목을 입력해주세요!");
-        return;
-    }
-    if (isNaN(month) || isNaN(day)) {
-        alert("정확한 음력 월/일을 입력해주세요!");
-        return;
-    }
+    if (!month || !day) return alert("음력 날짜를 입력하세요.");
 
-    // 3. calendar.js의 함수를 이용해 양력 날짜들 계산
-    const dates = getSolarDates(month, day, isLeap, count);
-    
-    // 4. 화면에 결과 출력
-    const listEl = document.getElementById('dateList');
-    listEl.innerHTML = ''; // 이전 목록 초기화
-    
-    dates.forEach(date => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-        li.innerHTML = `
-            <span><strong>${title}</strong></span>
-            <span class="badge bg-info text-dark">${date} (양력)</span>
-        `;
-        listEl.appendChild(li);
-    });
-    
-    // 5. 미리보기 영역 보이기
-    document.getElementById('previewSection').classList.remove('d-none');
+    cachedDates = getSolarDates(month, day, isLeap, count);
+    const previewDiv = document.getElementById('previewList');
+    previewDiv.innerHTML = "<strong>변환 결과:</strong><br>" + cachedDates.join('<br>');
 });
 
-// js/main.js 하단부 수정
-
+// 구글 등록 버튼
 document.getElementById('syncBtn').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value;
-    const month = parseInt(document.getElementById('lunarMonth').value);
-    const day = parseInt(document.getElementById('lunarDay').value);
-    const isLeap = document.getElementById('isLeap').checked;
-    const count = parseInt(document.getElementById('repeatYears').value) || 10;
-
-    // 미리보기 목록에 있는 날짜들을 다시 가져옴
-    const dates = getSolarDates(month, day, isLeap, count);
-
-    if (dates.length === 0) {
-        alert("먼저 양력 변환을 실행해주세요.");
-        return;
-    }
-
-    // 구글 등록 함수 호출
+    const description = document.getElementById('eventDescription').value;
+    
+    if (cachedDates.length === 0) return alert("먼저 미리보기를 실행하세요.");
+    
     try {
-        await addEventsToCalendar(title, dates);
-    } catch (error) {
-        console.error(error);
-        alert("등록 중 오류가 발생했습니다. API 키와 클라이언트 ID를 확인해주세요.");
+        await addEventsToCalendar(title, description, cachedDates);
+    } catch (err) {
+        console.error(err);
+        alert("등록 중 오류가 발생했습니다.");
     }
+});
+
+// 삭제를 위한 검색 버튼
+document.getElementById('searchBtn').addEventListener('click', async () => {
+    const keyword = document.getElementById('deleteKeyword').value;
+    if (!keyword) return alert("검색할 키워드를 입력하세요.");
+
+    foundEvents = await searchEvents(keyword);
+    const resultDiv = document.getElementById('searchResultList');
+    
+    if (foundEvents.length === 0) {
+        resultDiv.innerText = "일치하는 일정이 없습니다.";
+        document.getElementById('bulkDeleteBtn').style.display = 'none';
+    } else {
+        resultDiv.innerHTML = foundEvents.map(e => `[${e.start.date || e.start.dateTime}] ${e.summary}`).join('<br>');
+        document.getElementById('bulkDeleteBtn').style.display = 'block';
+    }
+});
+
+// 일괄 삭제 실행 버튼
+document.getElementById('bulkDeleteBtn').addEventListener('click', async () => {
+    const ids = foundEvents.map(e => e.id);
+    await deleteEvents(ids);
+    document.getElementById('searchResultList').innerHTML = '';
+    document.getElementById('bulkDeleteBtn').style.display = 'none';
 });
