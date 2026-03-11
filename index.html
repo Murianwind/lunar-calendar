@@ -8,10 +8,10 @@
         .input-group { margin-bottom: 10px; }
         .helper-links { margin-bottom: 15px; font-size: 0.85em; }
         .helper-links a { color: #1a73e8; text-decoration: none; margin-right: 10px; }
-        label { display: inline-block; width: 120px; }
-        input[type="text"], input[type="number"] { padding: 5px; width: 200px; }
+        label { display: inline-block; width: 140px; }
+        input[type="text"], input[type="password"], input[type="number"] { padding: 5px; width: 250px; }
         .date-input { width: 60px !important; }
-        button { padding: 10px 15px; cursor: pointer; margin-right: 5px; }
+        button { padding: 8px 12px; cursor: pointer; margin-right: 5px; }
         #previewList { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; }
         .delete-section { margin-top: 40px; padding: 20px; border: 1px solid #ccc; background: #fff8f8; }
         #searchResultList { margin: 10px 0; font-size: 0.9em; color: #555; }
@@ -29,15 +29,13 @@
 
     <div class="input-group">
         <label>Google Client ID</label>
-        <input type="text" id="clientId" placeholder="숫자-문자.apps.googleusercontent.com">
+        <input type="password" id="clientId" placeholder="클라이언트 ID 입력">
     </div>
     <div class="input-group">
         <label>Google API Key</label>
-        <input type="text" id="apiKey" placeholder="AIzaSy...">
-    </div>
-    <div class="input-group">
-        <label></label>
-        <label style="width: auto;"><input type="checkbox" id="saveInfo"> 인증 정보 저장 (공용 PC 주의)</label>
+        <input type="password" id="apiKey" placeholder="API 키 입력">
+        <button id="saveAuthBtn" style="padding: 4px 8px; font-size: 0.8em;">인증정보 저장</button>
+        <button id="clearAuthBtn" style="padding: 4px 8px; font-size: 0.8em;">삭제</button>
     </div>
 
     <hr>
@@ -78,7 +76,6 @@
     <script src="./js/calendar.js"></script>
     <script src="./js/auth.js"></script>
     <script src="./js/main.js"></script>
-
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
