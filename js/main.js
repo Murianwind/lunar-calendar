@@ -38,7 +38,28 @@ document.getElementById('convertBtn').addEventListener('click', () => {
     document.getElementById('previewSection').classList.remove('d-none');
 });
 
-// 구글 등록 버튼 클릭 시 (아직 auth.js가 미완성이므로 알림만)
-document.getElementById('syncBtn').addEventListener('click', () => {
-    alert("구글 API 설정 및 auth.js 구현이 완료되어야 등록이 가능합니다.");
+// js/main.js 하단부 수정
+
+document.getElementById('syncBtn').addEventListener('click', async () => {
+    const title = document.getElementById('eventTitle').value;
+    const month = parseInt(document.getElementById('lunarMonth').value);
+    const day = parseInt(document.getElementById('lunarDay').value);
+    const isLeap = document.getElementById('isLeap').checked;
+    const count = parseInt(document.getElementById('repeatYears').value) || 10;
+
+    // 미리보기 목록에 있는 날짜들을 다시 가져옴
+    const dates = getSolarDates(month, day, isLeap, count);
+
+    if (dates.length === 0) {
+        alert("먼저 양력 변환을 실행해주세요.");
+        return;
+    }
+
+    // 구글 등록 함수 호출
+    try {
+        await addEventsToCalendar(title, dates);
+    } catch (error) {
+        console.error(error);
+        alert("등록 중 오류가 발생했습니다. API 키와 클라이언트 ID를 확인해주세요.");
+    }
 });
