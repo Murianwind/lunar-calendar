@@ -1,13 +1,34 @@
 let cachedDates = [];
 let foundEvents = [];
 
-// 페이지 로드 시 저장된 정보 불러오기
+// 페이지 로드 시 저장된 인증 정보만 불러오기
 window.addEventListener('load', () => {
     const savedId = localStorage.getItem('google_client_id');
     const savedKey = localStorage.getItem('google_api_key');
     if (savedId) document.getElementById('clientId').value = savedId;
     if (savedKey) document.getElementById('apiKey').value = savedKey;
+    
+    // [삭제됨] 올해 연도 자동 입력 로직을 제거하여 빈칸으로 유지합니다.
 });
+
+// 미리보기 버튼
+document.getElementById('previewBtn').addEventListener('click', () => {
+    const year = parseInt(document.getElementById('lunarYear').value);
+    const month = parseInt(document.getElementById('lunarMonth').value);
+    const day = parseInt(document.getElementById('lunarDay').value);
+    const isLeap = document.getElementById('isLeap').checked;
+    const count = parseInt(document.getElementById('repeatYears').value) || 10;
+
+    // 빈칸 체크 강화
+    if (!year || !month || !day) {
+        return alert("연도, 월, 일을 모두 입력해주세요.");
+    }
+
+    cachedDates = getSolarDates(year, month, day, isLeap, count);
+    document.getElementById('previewList').innerHTML = "<strong>양력 변환 결과:</strong><br>" + cachedDates.join('<br>');
+});
+
+// ... (이하 인증 저장, 등록, 검색/삭제 로직은 동일)
 
 // 인증정보 저장 버튼
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
