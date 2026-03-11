@@ -10,7 +10,6 @@
         .helper-links a { color: #1a73e8; text-decoration: none; margin-right: 10px; }
         label { display: inline-block; width: 120px; }
         input[type="text"], input[type="number"] { padding: 5px; width: 200px; }
-        /* 월, 일 입력칸 전용 스타일 */
         .date-input { width: 60px !important; }
         button { padding: 10px 15px; cursor: pointer; margin-right: 5px; }
         #previewList { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; }
@@ -40,6 +39,7 @@
         <label></label>
         <label style="width: auto;"><input type="checkbox" id="saveInfo"> 인증 정보 저장 (공용 PC 주의)</label>
     </div>
+
     <hr>
 
     <div class="input-group">
@@ -48,8 +48,8 @@
     </div>
     <div class="input-group">
         <label>음력 날짜</label>
-        <input type="number" id="lunarMonth" class="date-input" min="1" max="12" value="1" placeholder="월">
-        <input type="number" id="lunarDay" class="date-input" min="1" max="31" value="1" placeholder="일">
+        <input type="number" id="lunarMonth" class="date-input" min="1" max="12" value="1">
+        <input type="number" id="lunarDay" class="date-input" min="1" max="31" value="1">
         <label style="width: auto; margin-left: 10px;"><input type="checkbox" id="isLeap"> 윤달</label>
     </div>
     <div class="input-group">
@@ -58,7 +58,7 @@
     </div>
     <div class="input-group">
         <label>설명(태그)</label>
-        <input type="text" id="eventDescription" placeholder="예: #가족생일 (삭제 시 검색용)">
+        <input type="text" id="eventDescription" placeholder="예: #가족생일">
     </div>
 
     <button id="previewBtn">양력 변환 및 미리보기</button>
@@ -68,18 +68,18 @@
 
     <div class="delete-section">
         <h3>일정 일괄 삭제</h3>
-        <p style="font-size: 0.9em; color: #666;">등록 시 사용한 키워드로 검색하여 삭제합니다.</p>
         <input type="text" id="deleteKeyword" placeholder="검색 키워드 입력">
         <button id="searchBtn">일정 찾기</button>
         <div id="searchResultList"></div>
         <button id="bulkDeleteBtn" style="display:none; background-color: #d93025; color: white; border: none;">모든 검색 결과 삭제</button>
     </div>
 
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
     <script src="https://cdn.jsdelivr.net/npm/korean-lunar-calendar@0.1.2/dist/korean-lunar-calendar.min.js"></script>
     <script src="./js/calendar.js"></script>
     <script src="./js/auth.js"></script>
     <script src="./js/main.js"></script>
+
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
