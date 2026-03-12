@@ -38,10 +38,17 @@
     </div>
 
     <div class="step">
-        <h2>4단계: API 키 및 클라이언트 ID 발급</h2>
-        <p>1. <strong>[사용자 인증 정보]</strong> 메뉴로 이동합니다.<br>
-        2. <strong>[사용자 인증 정보 만들기] > [API 키]</strong>를 생성하여 복사합니다.<br>
-        3. <strong>[사용자 인증 정보 만들기] > [OAuth 클라이언트 ID]</strong>를 클릭합니다.<br>
+       <h2>4단계: API 키 발급 및 보안 설정 (권장)</h2>
+       <p>1. <strong>[사용자 인증 정보 만들기] > [API 키]</strong>를 생성합니다.<br>
+          2. API키를 생성할 때 제한사항을 설정합니다.</p>
+        <ul>
+          <li><strong>API 제한사항:</strong> [키 제한]을 선택하고 리스트에서 <code>Google Calendar API</code>만 체크합니다. (이 키로 다른 API를 쓰지 못하게 차단)</li>
+          <li><strong>웹사이트 제한사항:</strong> [HTTP 리퍼러]를 선택하고 아래 주소를 추가합니다.<br>
+              <code>https://murianwind.github.io/*</code> (특정 사이트에서만 이 키를 쓸 수 있게 허용)
+          </li>
+        </ul>
+    </div>
+        3. <strong>[사용자 인증 정보 만들기] > [OAuth 클라이언트 ID]</strong>를 생성합니다.<br>
         4. 유형은 <strong>웹 애플리케이션</strong>을 선택하고, <strong>승인된 JavaScript 원본</strong>에 현재 홈페이지 주소(예: <code>https://murianwind.github.io</code>)를 추가합니다.<br>
         5. 생성된 <strong>클라이언트 ID</strong>를 복사합니다.</p>
     </div>
