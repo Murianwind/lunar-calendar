@@ -7,7 +7,7 @@ window.addEventListener('load', () => {
     document.getElementById('apiKey').value = localStorage.getItem('google_api_key') || '';
 });
 
-// --- 입력값 범위 자동 보정 (사용자 요청 사항) ---
+// --- 사용자가 입력 범위를 벗어나면 자동으로 보정하는 로직 ---
 document.getElementById('lunarMonth').addEventListener('blur', function() {
     let val = parseInt(this.value);
     if (val < 1) this.value = 1;
@@ -23,15 +23,16 @@ document.getElementById('lunarDay').addEventListener('blur', function() {
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
     localStorage.setItem('google_client_id', document.getElementById('clientId').value);
     localStorage.setItem('google_api_key', document.getElementById('apiKey').value);
-    alert("인증 정보가 저장되었습니다.");
+    alert("인증 정보가 브라우저에 저장되었습니다.");
 });
+
 document.getElementById('clearAuthBtn').addEventListener('click', () => {
     localStorage.removeItem('google_client_id');
     localStorage.removeItem('google_api_key');
     location.reload();
 });
 
-// 미리보기 및 양력 변환
+// 미리보기 (올해부터 10년치 계산)
 document.getElementById('previewBtn').addEventListener('click', () => {
     const year = document.getElementById('lunarYear').value;
     const month = document.getElementById('lunarMonth').value;
@@ -39,20 +40,20 @@ document.getElementById('previewBtn').addEventListener('click', () => {
     const isLeap = document.getElementById('isLeap').checked;
     const count = parseInt(document.getElementById('repeatYears').value) || 10;
 
-    if (!year || !month || !day) return alert("연도, 월, 일을 입력하세요.");
+    if (!month || !day) return alert("월과 일을 정확히 입력하세요.");
 
     cachedDates = getSolarDates(year, month, day, isLeap, count);
-    document.getElementById('previewList').innerHTML = "<strong>양력 변환 결과:</strong><br>" + cachedDates.join('<br>');
+    document.getElementById('previewList').innerHTML = "<strong>올해(2026년)부터의 변환 결과:</strong><br>" + cachedDates.join('<br>');
 });
 
-// 구글 등록
+// 구글 캘린더 등록
 document.getElementById('syncBtn').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value;
-    if (!title || cachedDates.length === 0) return alert("제목과 날짜 미리보기를 완료하세요.");
+    if (!title || cachedDates.length === 0) return alert("제목 입력과 미리보기를 먼저 완료하세요.");
     await addEventsToCalendar(title, document.getElementById('eventDescription').value, cachedDates);
 });
 
-// 일정 찾기
+// 일정 검색
 document.getElementById('searchBtn').addEventListener('click', async () => {
     const kw = document.getElementById('deleteKeyword').value;
     foundEvents = await searchEvents(kw);
@@ -63,7 +64,7 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
 
 // 일괄 삭제
 document.getElementById('bulkDeleteBtn').addEventListener('click', async () => {
-    if(confirm("정말 모두 삭제할까요?")) {
+    if(confirm("검색된 모든 일정을 정말 삭제하시겠습니까?")) {
         await deleteEvents(foundEvents.map(e => e.id));
         location.reload();
     }
