@@ -1,38 +1,35 @@
 let cachedDates = [];
 let foundEvents = [];
 
-// 로드 시 인증정보 불러오기
 window.addEventListener('load', () => {
     document.getElementById('clientId').value = localStorage.getItem('google_client_id') || '';
     document.getElementById('apiKey').value = localStorage.getItem('google_api_key') || '';
 });
 
-// --- 입력 범위 강제 제한 로직 추가 ---
+// 월/일 범위 강제 보정
 document.getElementById('lunarMonth').addEventListener('blur', function() {
     let val = parseInt(this.value);
     if (val < 1) this.value = 1;
     if (val > 12) this.value = 12;
 });
-
 document.getElementById('lunarDay').addEventListener('blur', function() {
     let val = parseInt(this.value);
     if (val < 1) this.value = 1;
     if (val > 31) this.value = 31;
 });
-// ---------------------------------
 
-// 저장/삭제 버튼
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
     localStorage.setItem('google_client_id', document.getElementById('clientId').value);
     localStorage.setItem('google_api_key', document.getElementById('apiKey').value);
     alert("저장되었습니다.");
 });
+
 document.getElementById('clearAuthBtn').addEventListener('click', () => {
-    localStorage.clear();
+    localStorage.removeItem('google_client_id');
+    localStorage.removeItem('google_api_key');
     location.reload();
 });
 
-// 미리보기
 document.getElementById('previewBtn').addEventListener('click', () => {
     const year = document.getElementById('lunarYear').value;
     const month = document.getElementById('lunarMonth').value;
@@ -40,27 +37,19 @@ document.getElementById('previewBtn').addEventListener('click', () => {
     const isLeap = document.getElementById('isLeap').checked;
     const count = parseInt(document.getElementById('repeatYears').value) || 10;
 
-    if (!year || !month || !day) return alert("연도, 월, 일을 입력하세요.");
+    if (!year || !month || !day) return alert("날짜를 모두 입력하세요.");
 
-    // 라이브러리 존재 여부를 여기서 한 번 더 체크 (에러 방지)
-    if (typeof koreanLunarCalendar === 'undefined') {
-        return alert("라이브러리가 아직 로드되지 않았습니다. 잠시만 기다려주세요.");
-    }
-
+    // 잘 되던 방식으로 호출 (체크 로직 삭제)
     cachedDates = getSolarDates(year, month, day, isLeap, count);
-    document.getElementById('previewList').innerHTML = "<strong>변환 날짜:</strong><br>" + cachedDates.join('<br>');
+    document.getElementById('previewList').innerHTML = "<strong>결과:</strong><br>" + cachedDates.join('<br>');
 });
 
-// 등록
 document.getElementById('syncBtn').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value;
     if (!title || cachedDates.length === 0) return alert("제목 입력과 미리보기를 완료하세요.");
-    try {
-        await addEventsToCalendar(title, document.getElementById('eventDescription').value, cachedDates);
-    } catch (e) { alert("등록 중 오류 발생"); }
+    await addEventsToCalendar(title, document.getElementById('eventDescription').value, cachedDates);
 });
 
-// 찾기 및 삭제
 document.getElementById('searchBtn').addEventListener('click', async () => {
     const kw = document.getElementById('deleteKeyword').value;
     foundEvents = await searchEvents(kw);
