@@ -3,11 +3,13 @@ let cachedDates = [];
 let foundEvents = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('clientId').value = localStorage.getItem('google_client_id') || '';
-    document.getElementById('apiKey').value = localStorage.getItem('google_api_key') || '';
+    const savedId = localStorage.getItem('google_client_id');
+    const savedKey = localStorage.getItem('google_api_key');
+    if (savedId) document.getElementById('clientId').value = savedId;
+    if (savedKey) document.getElementById('apiKey').value = savedKey;
 });
 
-// 입력 범위 보정
+// 입력 범위 자동 보정
 document.getElementById('lunarMonth').addEventListener('blur', function() {
     let val = parseInt(this.value);
     if (val < 1) this.value = 1; if (val > 12) this.value = 12;
@@ -17,7 +19,7 @@ document.getElementById('lunarDay').addEventListener('blur', function() {
     if (val < 1) this.value = 1; if (val > 31) this.value = 31;
 });
 
-// 인증 정보 저장/삭제
+// 인증정보 저장/삭제
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
     localStorage.setItem('google_client_id', document.getElementById('clientId').value);
     localStorage.setItem('google_api_key', document.getElementById('apiKey').value);
@@ -36,32 +38,71 @@ document.getElementById('previewBtn').addEventListener('click', () => {
     const count = parseInt(document.getElementById('repeatYears').value) || 10;
     if (!month || !day) return alert("월과 일을 입력하세요.");
     cachedDates = getSolarDates(null, month, day, isLeap, count);
-    document.getElementById('previewList').innerHTML = "<strong>올해부터의 변환 결과:</strong><br>" + cachedDates.join('<br>');
+    document.getElementById('previewList').innerHTML = "<strong>변환 결과:</strong><br>" + cachedDates.join('<br>');
 });
 
-// [수정] 등록 버튼 이벤트 - 상태 메시지 및 버튼 비활성화 적용
+// 구글 캘린더 등록 버튼
 document.getElementById('syncBtn').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value;
     const desc = document.getElementById('eventDescription').value;
     const btn = document.getElementById('syncBtn');
     const status = document.getElementById('syncStatus');
-
-    if (!title || cachedDates.length === 0) return alert("제목과 미리보기를 확인하세요.");
-
-    // 진행 상태 표시
+    if (!title || cachedDates.length === 0) return alert("제목 입력과 미리보기를 먼저 완료하세요.");
+    
     btn.disabled = true;
     status.innerText = "⏳ 등록 중...";
-
     try {
         await addEventsToCalendar(title, desc, cachedDates);
         alert("모든 일정이 등록되었습니다.");
     } catch (err) {
         alert("등록 중 오류가 발생했습니다.");
     } finally {
-        // 원래 상태로 복구
         status.innerText = "";
         btn.disabled = false;
     }
+});
+
+/**
+ * [추가 기능] 파일로 저장 (.ics)
+ * 구글 API 없이 브라우저 자체에서 파일을 생성합니다.
+ */
+document.getElementById('downloadIcsBtn').addEventListener('click', () => {
+    const title = document.getElementById('eventTitle').value;
+    if (!title || cachedDates.length === 0) {
+        return alert("일정 제목을 입력하고 '미리보기'를 먼저 완료해 주세요.");
+    }
+
+    let icsContent = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//LunarCalendar//KR",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH"
+    ];
+
+    cachedDates.forEach(date => {
+        const dateStr = date.replace(/-/g, ""); // 20260312 형식
+        icsContent.push("BEGIN:VEVENT");
+        icsContent.push(`SUMMARY:${title}`);
+        icsContent.push(`DTSTART;VALUE=DATE:${dateStr}`);
+        icsContent.push(`DTEND;VALUE=DATE:${dateStr}`);
+        icsContent.push("TRANSP:TRANSPARENT");
+        icsContent.push("END:VEVENT");
+    });
+
+    icsContent.push("END:VCALENDAR");
+
+    const blob = new Blob([icsContent.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${title}_음력일정.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    alert("파일이 생성되었습니다. 애플 캘린더나 네이버/카카오 달력에서 이 파일을 불러오세요.");
 });
 
 // 검색 버튼
@@ -80,17 +121,13 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     }
 });
 
-// [수정] 삭제 버튼 이벤트 - 상태 메시지 및 버튼 비활성화 적용
+// 삭제 버튼
 document.getElementById('bulkDeleteBtn').addEventListener('click', async () => {
     if (!confirm("검색된 모든 일정을 삭제하시겠습니까?")) return;
-
     const btn = document.getElementById('bulkDeleteBtn');
     const status = document.getElementById('deleteStatus');
-
-    // 진행 상태 표시
     btn.disabled = true;
     status.innerText = "⏳ 삭제 중...";
-
     try {
         await deleteEvents(foundEvents.map(e => e.id));
         alert("삭제가 완료되었습니다.");
