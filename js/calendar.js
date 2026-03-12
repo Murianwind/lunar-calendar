@@ -1,7 +1,15 @@
 function getSolarDates(year, month, day, isLeap, count) {
     const dates = [];
-    // 잘 되던 예전 방식으로 원복
-    const lunar = new koreanLunarCalendar();
+    
+    // 라이브러리 객체 확인 (대소문자 무관하게 작동하도록 설정)
+    const LunarClass = window.KoreanLunarCalendar || window.koreanLunarCalendar;
+    
+    if (!LunarClass) {
+        alert("음력 변환 라이브러리를 불러오지 못했습니다. 네트워크 상태를 확인하세요.");
+        return [];
+    }
+
+    const lunar = new LunarClass();
 
     for (let i = 0; i < count; i++) {
         const currentYear = Number(year) + i;
