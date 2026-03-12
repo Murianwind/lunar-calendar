@@ -1,13 +1,17 @@
-/* main.js - 토큰 유지를 위해 새로고침 최소화 */
+/* main.js - 데이터 유지 및 UI 최적화 버전 */
 let cachedDates = [];
 let foundEvents = [];
 
-window.addEventListener('load', () => {
-    document.getElementById('clientId').value = localStorage.getItem('google_client_id') || '';
-    document.getElementById('apiKey').value = localStorage.getItem('google_api_key') || '';
+// [중요] 페이지 로드 시 즉시 실행 (가장 먼저 실행되어 빈칸을 채움)
+document.addEventListener('DOMContentLoaded', () => {
+    const savedId = localStorage.getItem('google_client_id');
+    const savedKey = localStorage.getItem('google_api_key');
+    
+    if (savedId) document.getElementById('clientId').value = savedId;
+    if (savedKey) document.getElementById('apiKey').value = savedKey;
 });
 
-// 입력 범위 보정 로직
+// 입력 범위 자동 보정
 document.getElementById('lunarMonth').addEventListener('blur', function() {
     let val = parseInt(this.value);
     if (val < 1) this.value = 1;
@@ -19,25 +23,29 @@ document.getElementById('lunarDay').addEventListener('blur', function() {
     if (val > 31) this.value = 31;
 });
 
-// 인증정보 저장
+// 인증정보 저장 (이걸 한 번 눌러야 다음부터 자동으로 채워집니다)
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
-    localStorage.setItem('google_client_id', document.getElementById('clientId').value);
-    localStorage.setItem('google_api_key', document.getElementById('apiKey').value);
-    alert("인증 정보가 저장되었습니다. 반영을 위해 한 번 새로고침합니다.");
-    location.reload();
+    const cid = document.getElementById('clientId').value;
+    const akey = document.getElementById('apiKey').value;
+    
+    if (!cid || !akey) return alert("ID와 Key를 모두 입력해주세요.");
+    
+    localStorage.setItem('google_client_id', cid);
+    localStorage.setItem('google_api_key', akey);
+    alert("인증 정보가 저장되었습니다. 반영을 위해 새로고침합니다.");
+    location.reload(); 
 });
 
-// 인증정보 삭제
 document.getElementById('clearAuthBtn').addEventListener('click', () => {
     localStorage.removeItem('google_client_id');
     localStorage.removeItem('google_api_key');
+    document.getElementById('clientId').value = '';
+    document.getElementById('apiKey').value = '';
     alert("정보가 삭제되었습니다.");
-    location.reload();
 });
 
-// 미리보기
+// 미리보기 (연도와 상관없이 올해부터 계산)
 document.getElementById('previewBtn').addEventListener('click', () => {
-    const year = document.getElementById('lunarYear').value;
     const month = document.getElementById('lunarMonth').value;
     const day = document.getElementById('lunarDay').value;
     const isLeap = document.getElementById('isLeap').checked;
@@ -45,8 +53,9 @@ document.getElementById('previewBtn').addEventListener('click', () => {
 
     if (!month || !day) return alert("월과 일을 입력하세요.");
 
-    cachedDates = getSolarDates(year, month, day, isLeap, count);
-    document.getElementById('previewList').innerHTML = "<strong>올해부터의 변환 결과:</strong><br>" + cachedDates.join('<br>');
+    // calendar.js의 함수 호출
+    cachedDates = getSolarDates(null, month, day, isLeap, count);
+    document.getElementById('previewList').innerHTML = "<strong>올해(2026년)부터의 변환 결과:</strong><br>" + cachedDates.join('<br>');
 });
 
 // 등록 버튼
@@ -54,8 +63,6 @@ document.getElementById('syncBtn').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value;
     const desc = document.getElementById('eventDescription').value;
     if (!title || cachedDates.length === 0) return alert("제목 입력과 미리보기를 먼저 완료하세요.");
-    
-    // addEventsToCalendar 내부에서 getAccessToken이 토큰을 체크하므로 중복 팝업 안 뜸
     await addEventsToCalendar(title, desc, cachedDates);
 });
 
@@ -77,13 +84,16 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     }
 });
 
-// 삭제 버튼
+// 삭제 버튼 (새로고침 없이 UI만 업데이트)
 document.getElementById('bulkDeleteBtn').addEventListener('click', async () => {
     if (confirm("검색된 모든 일정을 삭제하시겠습니까?")) {
-        await deleteEvents(foundEvents.map(e => e.id));
-        // 삭제 후 목록 초기화 (새로고침 없이 UI만 변경)
-        document.getElementById('searchResultList').innerHTML = "삭제 완료";
-        document.getElementById('bulkDeleteBtn').style.display = 'none';
-        foundEvents = [];
+        const success = await deleteEvents(foundEvents.map(e => e.id));
+        if (success) {
+            alert("삭제 완료되었습니다.");
+            // 새로고침을 하지 않으므로 ID와 Key가 그대로 유지됩니다.
+            document.getElementById('searchResultList').innerHTML = "";
+            document.getElementById('bulkDeleteBtn').style.display = 'none';
+            foundEvents = [];
+        }
     }
 });
