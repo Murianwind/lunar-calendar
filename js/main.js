@@ -9,22 +9,14 @@ window.addEventListener('load', () => {
 });
 
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
-    const clientId = document.getElementById('clientId').value;
-    const apiKey = document.getElementById('apiKey').value;
-    if (clientId && apiKey) {
-        localStorage.setItem('google_client_id', clientId);
-        localStorage.setItem('google_api_key', apiKey);
-        alert("인증 정보 저장 완료");
-        location.reload(); 
-    } else {
-        alert("ID와 Key를 입력하세요.");
-    }
+    localStorage.setItem('google_client_id', document.getElementById('clientId').value);
+    localStorage.setItem('google_api_key', document.getElementById('apiKey').value);
+    alert("저장되었습니다.");
+    location.reload(); 
 });
 
 document.getElementById('clearAuthBtn').addEventListener('click', () => {
-    localStorage.removeItem('google_client_id');
-    localStorage.removeItem('google_api_key');
-    alert("정보 삭제 완료");
+    localStorage.clear();
     location.reload();
 });
 
@@ -35,55 +27,29 @@ document.getElementById('previewBtn').addEventListener('click', () => {
     const isLeap = document.getElementById('isLeap').checked;
     const count = parseInt(document.getElementById('repeatYears').value) || 10;
 
-    if (!year || !month || !day) {
-        alert("연도, 월, 일을 모두 입력하세요.");
-        return;
-    }
+    if (!year || !month || !day) return alert("날짜를 입력하세요.");
 
     cachedDates = getSolarDates(year, month, day, isLeap, count);
-    
-    const previewDiv = document.getElementById('previewList');
-    if (cachedDates.length === 0) {
-        previewDiv.innerHTML = "변환 실패 (날짜를 확인하세요)";
-    } else {
-        previewDiv.innerHTML = "<strong>양력 변환 결과:</strong><br>" + cachedDates.join('<br>');
-    }
+    document.getElementById('previewList').innerHTML = "<strong>결과:</strong><br>" + cachedDates.join('<br>');
 });
 
 document.getElementById('syncBtn').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value;
-    const description = document.getElementById('eventDescription').value;
-    if (!title) return alert("일정 제목을 입력하세요.");
-    if (cachedDates.length === 0) return alert("미리보기를 먼저 해주세요.");
-    
-    try {
-        await addEventsToCalendar(title, description, cachedDates);
-    } catch (err) { 
-        alert("등록 중 오류 발생"); 
-    }
+    if (!title || cachedDates.length === 0) return alert("제목 입력 및 미리보기를 완료하세요.");
+    await addEventsToCalendar(title, document.getElementById('eventDescription').value, cachedDates);
 });
 
 document.getElementById('searchBtn').addEventListener('click', async () => {
-    const keyword = document.getElementById('deleteKeyword').value;
-    if (!keyword) return alert("검색어를 입력하세요.");
-    try {
-        foundEvents = await searchEvents(keyword);
-        const resultDiv = document.getElementById('searchResultList');
-        if (foundEvents.length === 0) {
-            resultDiv.innerText = "검색 결과가 없습니다.";
-            document.getElementById('bulkDeleteBtn').style.display = 'none';
-        } else {
-            resultDiv.innerHTML = `<strong>검색된 일정 (${foundEvents.length}건):</strong><br>` + 
-                foundEvents.map(e => `[${e.start.date || e.start.dateTime}] ${e.summary}`).join('<br>');
-            document.getElementById('bulkDeleteBtn').style.display = 'block';
-        }
-    } catch (err) { alert("검색 실패"); }
+    const kw = document.getElementById('deleteKeyword').value;
+    foundEvents = await searchEvents(kw);
+    const resDiv = document.getElementById('searchResultList');
+    resDiv.innerHTML = foundEvents.map(e => `[${e.start.date || e.start.dateTime}] ${e.summary}`).join('<br>');
+    document.getElementById('bulkDeleteBtn').style.display = foundEvents.length ? 'block' : 'none';
 });
 
 document.getElementById('bulkDeleteBtn').addEventListener('click', async () => {
-    if(confirm("정말 모두 삭제하시겠습니까?")) {
+    if(confirm("삭제할까요?")) {
         await deleteEvents(foundEvents.map(e => e.id));
-        document.getElementById('searchResultList').innerHTML = '';
-        document.getElementById('bulkDeleteBtn').style.display = 'none';
+        location.reload();
     }
 });
