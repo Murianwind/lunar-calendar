@@ -12,7 +12,6 @@
         button { padding: 8px 12px; cursor: pointer; margin-right: 5px; }
         #previewList { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; }
         .delete-section { margin-top: 40px; padding: 20px; border: 1px solid #ccc; background: #fff8f8; }
-        #searchResultList { margin: 10px 0; font-size: 0.9em; color: #555; }
     </style>
 </head>
 <body>
@@ -27,14 +26,14 @@
         <label>Google API Key</label>
         <input type="password" id="apiKey">
         <button id="saveAuthBtn">인증정보 저장</button>
-        <button id="clearAuthBtn">삭제</button>
+        <button id="clearAuthBtn">정보 삭제</button>
     </div>
 
     <hr>
 
     <div class="input-group">
         <label>일정 제목</label>
-        <input type="text" id="eventTitle" value="">
+        <input type="text" id="eventTitle" placeholder="일정 제목을 입력하세요">
     </div>
     <div class="input-group">
         <label>음력 날짜</label>
@@ -49,11 +48,11 @@
     </div>
     <div class="input-group">
         <label>설명(태그)</label>
-        <input type="text" id="eventDescription" placeholder="#가족생일">
+        <input type="text" id="eventDescription" placeholder="#태그">
     </div>
 
     <button id="previewBtn">양력 변환 및 미리보기</button>
-    <button id="syncBtn">구글 캘린더 등록</button>
+    <button id="syncBtn" style="background-color: #4285f4; color: white; border: none;">구글 캘린더 등록</button>
 
     <div id="previewList"></div>
 
@@ -62,13 +61,15 @@
         <input type="text" id="deleteKeyword" placeholder="검색 키워드">
         <button id="searchBtn">찾기</button>
         <div id="searchResultList"></div>
-        <button id="bulkDeleteBtn" style="display:none;">일괄 삭제</button>
+        <button id="bulkDeleteBtn" style="display:none; background-color: #d93025; color: white; border: none;">일괄 삭제</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/korean-lunar-calendar/dist/korean-lunar-calendar.min.js"></script>
+    
     <script src="./js/calendar.js"></script>
     <script src="./js/auth.js"></script>
     <script src="./js/main.js"></script>
+
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
