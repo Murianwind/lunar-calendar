@@ -63,11 +63,13 @@ document.getElementById('syncBtn').addEventListener('click', async () => {
 });
 
 /**
- * [추가 기능] 파일로 저장 (.ics)
- * 구글 API 없이 브라우저 자체에서 파일을 생성합니다.
+ * [수정 완료] 파일로 저장 (.ics)
+ * DESCRIPTION 필드를 추가하여 설명(태그)이 포함되도록 했습니다.
  */
 document.getElementById('downloadIcsBtn').addEventListener('click', () => {
     const title = document.getElementById('eventTitle').value;
+    const desc = document.getElementById('eventDescription').value; // 설명값 가져오기
+    
     if (!title || cachedDates.length === 0) {
         return alert("일정 제목을 입력하고 '미리보기'를 먼저 완료해 주세요.");
     }
@@ -84,6 +86,10 @@ document.getElementById('downloadIcsBtn').addEventListener('click', () => {
         const dateStr = date.replace(/-/g, ""); // 20260312 형식
         icsContent.push("BEGIN:VEVENT");
         icsContent.push(`SUMMARY:${title}`);
+        // [추가] DESCRIPTION 항목에 설명/태그 삽입
+        if (desc) {
+            icsContent.push(`DESCRIPTION:${desc}`);
+        }
         icsContent.push(`DTSTART;VALUE=DATE:${dateStr}`);
         icsContent.push(`DTEND;VALUE=DATE:${dateStr}`);
         icsContent.push("TRANSP:TRANSPARENT");
@@ -102,7 +108,7 @@ document.getElementById('downloadIcsBtn').addEventListener('click', () => {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
     
-    alert("파일이 생성되었습니다. 애플 캘린더나 네이버/카카오 달력에서 이 파일을 불러오세요.");
+    alert("파일이 생성되었습니다. 설명(태그)이 포함되었습니다.");
 });
 
 // 검색 버튼
