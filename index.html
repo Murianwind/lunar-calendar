@@ -6,8 +6,6 @@
     <style>
         body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
         .input-group { margin-bottom: 10px; }
-        .helper-links { margin-bottom: 15px; font-size: 0.85em; }
-        .helper-links a { color: #1a73e8; text-decoration: none; margin-right: 10px; }
         label { display: inline-block; width: 140px; }
         input[type="text"], input[type="password"], input[type="number"] { padding: 5px; width: 250px; }
         .date-input { width: 80px !important; }
@@ -21,63 +19,56 @@
 
     <h2>음력 일정 구글 캘린더 등록</h2>
     
-    <div class="helper-links">
-        <a href="https://console.cloud.google.com/apis/credentials" target="_blank">🔗 인증정보 확인</a>
-        <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank">📅 API 활성화</a>
-        <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">👤 테스트 사용자</a>
-    </div>
-
     <div class="input-group">
         <label>Google Client ID</label>
-        <input type="password" id="clientId" placeholder="클라이언트 ID 입력">
+        <input type="password" id="clientId">
     </div>
     <div class="input-group">
         <label>Google API Key</label>
-        <input type="password" id="apiKey" placeholder="API 키 입력">
-        <button id="saveAuthBtn" style="padding: 4px 8px; font-size: 0.8em;">인증정보 저장</button>
-        <button id="clearAuthBtn" style="padding: 4px 8px; font-size: 0.8em;">삭제</button>
+        <input type="password" id="apiKey">
+        <button id="saveAuthBtn">인증정보 저장</button>
+        <button id="clearAuthBtn">삭제</button>
     </div>
 
     <hr>
 
     <div class="input-group">
         <label>일정 제목</label>
-        <input type="text" id="eventTitle" value="" placeholder="일정 제목 입력">
+        <input type="text" id="eventTitle" value="">
     </div>
     <div class="input-group">
         <label>음력 날짜</label>
         <input type="number" id="lunarYear" class="date-input" placeholder="연도">
-        <input type="number" id="lunarMonth" class="date-input" min="1" max="12" placeholder="월" style="width: 60px !important;">
-        <input type="number" id="lunarDay" class="date-input" min="1" max="31" placeholder="일" style="width: 60px !important;">
+        <input type="number" id="lunarMonth" class="date-input" min="1" max="12" placeholder="월">
+        <input type="number" id="lunarDay" class="date-input" min="1" max="31" placeholder="일">
         <label style="width: auto; margin-left: 10px;"><input type="checkbox" id="isLeap"> 윤달</label>
     </div>
     <div class="input-group">
         <label>반복 횟수(년)</label>
-        <input type="number" id="repeatYears" value="10" min="1" max="50">
+        <input type="number" id="repeatYears" value="10">
     </div>
     <div class="input-group">
         <label>설명(태그)</label>
-        <input type="text" id="eventDescription" placeholder="예: #가족생일">
+        <input type="text" id="eventDescription" placeholder="#가족생일">
     </div>
 
     <button id="previewBtn">양력 변환 및 미리보기</button>
-    <button id="syncBtn" style="background-color: #4285f4; color: white; border: none;">구글 캘린더에 일괄 등록</button>
+    <button id="syncBtn">구글 캘린더 등록</button>
 
-    <div id="previewList">등록될 날짜가 여기에 표시됩니다.</div>
+    <div id="previewList"></div>
 
     <div class="delete-section">
         <h3>일정 일괄 삭제</h3>
-        <input type="text" id="deleteKeyword" placeholder="검색 키워드 입력">
-        <button id="searchBtn">일정 찾기</button>
+        <input type="text" id="deleteKeyword" placeholder="검색 키워드">
+        <button id="searchBtn">찾기</button>
         <div id="searchResultList"></div>
-        <button id="bulkDeleteBtn" style="display:none; background-color: #d93025; color: white; border: none;">모든 검색 결과 삭제</button>
+        <button id="bulkDeleteBtn" style="display:none;">일괄 삭제</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/korean-lunar-calendar/dist/korean-lunar-calendar.min.js"></script>
     <script src="./js/calendar.js"></script>
     <script src="./js/auth.js"></script>
     <script src="./js/main.js"></script>
-    
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
