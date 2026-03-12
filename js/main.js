@@ -1,4 +1,4 @@
-/* main.js - 깔끔한 호출 로직 */
+/* main.js - 토큰 유지를 위해 새로고침 최소화 */
 let cachedDates = [];
 let foundEvents = [];
 
@@ -7,7 +7,7 @@ window.addEventListener('load', () => {
     document.getElementById('apiKey').value = localStorage.getItem('google_api_key') || '';
 });
 
-// 입력 범위 보정
+// 입력 범위 보정 로직
 document.getElementById('lunarMonth').addEventListener('blur', function() {
     let val = parseInt(this.value);
     if (val < 1) this.value = 1;
@@ -19,17 +19,19 @@ document.getElementById('lunarDay').addEventListener('blur', function() {
     if (val > 31) this.value = 31;
 });
 
-// 인증정보 저장/삭제
+// 인증정보 저장
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
     localStorage.setItem('google_client_id', document.getElementById('clientId').value);
     localStorage.setItem('google_api_key', document.getElementById('apiKey').value);
-    alert("인증 정보가 저장되었습니다. 페이지를 새로고침합니다.");
+    alert("인증 정보가 저장되었습니다. 반영을 위해 한 번 새로고침합니다.");
     location.reload();
 });
 
+// 인증정보 삭제
 document.getElementById('clearAuthBtn').addEventListener('click', () => {
     localStorage.removeItem('google_client_id');
     localStorage.removeItem('google_api_key');
+    alert("정보가 삭제되었습니다.");
     location.reload();
 });
 
@@ -47,12 +49,13 @@ document.getElementById('previewBtn').addEventListener('click', () => {
     document.getElementById('previewList').innerHTML = "<strong>올해부터의 변환 결과:</strong><br>" + cachedDates.join('<br>');
 });
 
-// 등록 버튼 (이제 매번 로그인 창이 뜨지 않습니다)
+// 등록 버튼
 document.getElementById('syncBtn').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value;
     const desc = document.getElementById('eventDescription').value;
-    if (!title || cachedDates.length === 0) return alert("제목과 미리보기를 확인하세요.");
+    if (!title || cachedDates.length === 0) return alert("제목 입력과 미리보기를 먼저 완료하세요.");
     
+    // addEventsToCalendar 내부에서 getAccessToken이 토큰을 체크하므로 중복 팝업 안 뜸
     await addEventsToCalendar(title, desc, cachedDates);
 });
 
@@ -63,15 +66,24 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     
     foundEvents = await searchEvents(kw);
     const res = document.getElementById('searchResultList');
-    res.innerHTML = foundEvents.map(e => `[${e.start.date || e.start.dateTime}] ${e.summary}`).join('<br>');
-    document.getElementById('bulkDeleteBtn').style.display = foundEvents.length ? 'block' : 'none';
+    
+    if (foundEvents.length === 0) {
+        res.innerHTML = "검색 결과가 없습니다.";
+        document.getElementById('bulkDeleteBtn').style.display = 'none';
+    } else {
+        res.innerHTML = `<strong>검색된 일정 (${foundEvents.length}건):</strong><br>` + 
+            foundEvents.map(e => `[${e.start.date || e.start.dateTime}] ${e.summary}`).join('<br>');
+        document.getElementById('bulkDeleteBtn').style.display = 'block';
+    }
 });
 
 // 삭제 버튼
 document.getElementById('bulkDeleteBtn').addEventListener('click', async () => {
-    if(confirm("정말 모두 삭제할까요?")) {
+    if (confirm("검색된 모든 일정을 삭제하시겠습니까?")) {
         await deleteEvents(foundEvents.map(e => e.id));
-        document.getElementById('searchResultList').innerHTML = '';
+        // 삭제 후 목록 초기화 (새로고침 없이 UI만 변경)
+        document.getElementById('searchResultList').innerHTML = "삭제 완료";
         document.getElementById('bulkDeleteBtn').style.display = 'none';
+        foundEvents = [];
     }
 });
