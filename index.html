@@ -12,9 +12,11 @@
         input[type="text"], input[type="password"], input[type="number"] { padding: 5px; width: 250px; }
         .date-input { width: 80px !important; }
         button { padding: 8px 12px; cursor: pointer; margin-right: 5px; }
+        button:disabled { cursor: not-allowed; opacity: 0.6; }
         #previewList { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; }
         .delete-section { margin-top: 40px; padding: 20px; border: 1px solid #ccc; background: #fff8f8; }
         #searchResultList { margin: 10px 0; font-size: 0.9em; color: #555; }
+        .status-msg { font-size: 0.9em; font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -46,7 +48,7 @@
     </div>
     <div class="input-group">
         <label>음력 날짜</label>
-        <input type="number" id="lunarYear" class="date-input" placeholder="기준 연도">
+        <input type="number" id="lunarYear" class="date-input" placeholder="연도(선택)">
         <input type="number" id="lunarMonth" class="date-input" min="1" max="12" placeholder="월">
         <input type="number" id="lunarDay" class="date-input" min="1" max="31" placeholder="일">
         <label style="width: auto; margin-left: 10px;"><input type="checkbox" id="isLeap"> 윤달</label>
@@ -62,6 +64,7 @@
 
     <button id="previewBtn">양력 변환 및 미리보기</button>
     <button id="syncBtn" style="background-color: #4285f4; color: white; border: none;">구글 캘린더 등록</button>
+    <span id="syncStatus" class="status-msg" style="color: #4285f4;"></span>
 
     <div id="previewList"></div>
 
@@ -71,6 +74,7 @@
         <button id="searchBtn">찾기</button>
         <div id="searchResultList"></div>
         <button id="bulkDeleteBtn" style="display:none; background-color: #d93025; color: white; border: none;">일괄 삭제</button>
+        <span id="deleteStatus" class="status-msg" style="color: #d93025;"></span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/korean-lunar-calendar/dist/korean-lunar-calendar.min.js"></script>
