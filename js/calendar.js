@@ -1,11 +1,19 @@
 function getSolarDates(year, month, day, isLeap, count) {
     const dates = [];
-    const lunar = new koreanLunarCalendar(); // 예전 방식 그대로 복구
+    
+    // 라이브러리 로드 여부 체크
+    if (typeof koreanLunarCalendar === 'undefined') {
+        alert("라이브러리 로드 실패! 페이지를 새로고침(Ctrl+F5) 해주세요.");
+        return [];
+    }
+
+    const lunar = new koreanLunarCalendar();
 
     for (let i = 0; i < count; i++) {
-        const currentYear = Number(year) + i;
-        const currentMonth = Number(month);
-        const currentDay = Number(day);
+        // 입력받은 연도(year)에 i를 더해 매년 날짜 계산
+        const currentYear = parseInt(year) + i;
+        const currentMonth = parseInt(month);
+        const currentDay = parseInt(day);
         
         lunar.setLunarDate(currentYear, currentMonth, currentDay, isLeap);
         const solar = lunar.getSolarCalendar();
