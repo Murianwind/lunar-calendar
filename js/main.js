@@ -13,22 +13,27 @@ window.addEventListener('load', () => {
 
 // 미리보기 버튼
 document.getElementById('previewBtn').addEventListener('click', () => {
-    const year = parseInt(document.getElementById('lunarYear').value);
-    const month = parseInt(document.getElementById('lunarMonth').value);
-    const day = parseInt(document.getElementById('lunarDay').value);
-    const isLeap = document.getElementById('isLeap').checked;
-    const count = parseInt(document.getElementById('repeatYears').value) || 10;
+    // 값을 읽어올 때 반드시 숫자로 변환(parseInt)해야 합니다.
+    const yearVal = document.getElementById('lunarYear').value;
+    const monthVal = document.getElementById('lunarMonth').value;
+    const dayVal = document.getElementById('lunarDay').value;
 
-    // 빈칸 체크 강화
-    if (!year || !month || !day) {
+    if (!yearVal || !monthVal || !dayVal) {
         return alert("연도, 월, 일을 모두 입력해주세요.");
     }
 
-    cachedDates = getSolarDates(year, month, day, isLeap, count);
-    document.getElementById('previewList').innerHTML = "<strong>양력 변환 결과:</strong><br>" + cachedDates.join('<br>');
-});
+    const year = parseInt(yearVal);
+    const month = parseInt(monthVal);
+    const day = parseInt(dayVal);
+    const isLeap = document.getElementById('isLeap').checked;
+    const count = parseInt(document.getElementById('repeatYears').value) || 10;
 
-// ... (이하 인증 저장, 등록, 검색/삭제 로직은 동일)
+    // calendar.js의 함수 호출
+    cachedDates = getSolarDates(year, month, day, isLeap, count);
+    
+    const previewDiv = document.getElementById('previewList');
+    previewDiv.innerHTML = "<strong>양력 변환 결과:</strong><br>" + cachedDates.join('<br>');
+});
 
 // 인증정보 저장 버튼
 document.getElementById('saveAuthBtn').addEventListener('click', () => {
