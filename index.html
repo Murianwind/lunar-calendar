@@ -4,50 +4,51 @@
     <meta charset="UTF-8">
     <title>음력 달력 구글 연동</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto; }
         .input-group { margin-bottom: 10px; }
-        .helper-links { margin-bottom: 15px; font-size: 0.85em; }
-        .helper-links a { color: #1a73e8; text-decoration: none; margin-right: 10px; }
+        .helper-links { margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 8px; }
+        .helper-links a { color: #1a73e8; text-decoration: none; margin-right: 15px; font-weight: bold; }
         label { display: inline-block; width: 140px; }
-        input[type="text"], input[type="password"], input[type="number"] { padding: 5px; width: 250px; }
+        input[type="text"], input[type="password"], input[type="number"] { padding: 8px; width: 250px; border: 1px solid #ccc; border-radius: 4px; }
         .date-input { width: 80px !important; }
-        button { padding: 8px 12px; cursor: pointer; margin-right: 5px; }
+        button { padding: 10px 15px; cursor: pointer; margin-right: 5px; border-radius: 4px; border: 1px solid #ccc; background: #fff; }
+        button:hover { background: #f0f0f0; }
         button:disabled { cursor: not-allowed; opacity: 0.6; }
-        #previewList { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; }
-        .delete-section { margin-top: 40px; padding: 20px; border: 1px solid #ccc; background: #fff8f8; }
+        #previewList { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; }
+        .delete-section { margin-top: 40px; padding: 20px; border: 1px solid #ffccbc; background: #fffbfb; border-radius: 8px; }
         #searchResultList { margin: 10px 0; font-size: 0.9em; color: #555; }
         .status-msg { font-size: 0.9em; font-weight: bold; margin-left: 10px; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
 
-    <h2>음력 일정 구글 캘린더 등록</h2>
+    <h2>📅 음력 일정 구글 캘린더 등록</h2>
     
     <div class="helper-links">
         <div style="margin-bottom: 10px;">
-          <a href="./guide.html" target="_blank" style="font-size: 1.1em; color: #d93025;">🚀 처음 오셨나요? [사용 가이드 및 API 발급 방법 보기]</a>
+            <a href="./guide.html" target="_blank" style="font-size: 1.1em; color: #d93025;">🚀 처음 오셨나요? [사용 가이드 및 API 발급 방법 보기]</a>
         </div>
-        <a href="https://console.cloud.google.com/apis/credentials" target="_blank">🔗 인증정보 확인</a>
-        <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank">📅 API 활성화</a>
-        <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">👤 테스트 사용자</a>
+        <a href="https://console.cloud.google.com/apis/credentials" target="_blank">🔗 내 인증정보 확인</a>
+        <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank">📅 캘린더 API 활성화</a>
     </div>
 
     <div class="input-group">
         <label>Google Client ID</label>
-        <input type="password" id="clientId">
+        <input type="password" id="clientId" placeholder="OAuth 클라이언트 ID">
     </div>
     <div class="input-group">
         <label>Google API Key</label>
-        <input type="password" id="apiKey">
-        <button id="saveAuthBtn" style="padding: 4px 8px; font-size: 0.8em;">인증정보 저장</button>
-        <button id="clearAuthBtn" style="padding: 4px 8px; font-size: 0.8em;">삭제</button>
+        <input type="password" id="apiKey" placeholder="API 키">
+        <button id="saveAuthBtn" style="font-size: 0.85em;">인증정보 저장</button>
+        <button id="clearAuthBtn" style="font-size: 0.85em;">삭제</button>
     </div>
 
     <hr>
 
     <div class="input-group">
         <label>일정 제목</label>
-        <input type="text" id="eventTitle" value="" placeholder="일정 제목 입력">
+        <input type="text" id="eventTitle" placeholder="예: 아버지 생신">
     </div>
     <div class="input-group">
         <label>음력 날짜</label>
@@ -62,21 +63,25 @@
     </div>
     <div class="input-group">
         <label>설명(태그)</label>
-        <input type="text" id="eventDescription" placeholder="#태그">
+        <input type="text" id="eventDescription" placeholder="예: #가족행사">
     </div>
 
-    <button id="previewBtn">양력 변환 및 미리보기</button>
-    <button id="syncBtn" style="background-color: #4285f4; color: white; border: none;">구글 캘린더 등록</button>
-    <span id="syncStatus" class="status-msg" style="color: #4285f4;"></span>
+    <div class="input-group">
+        <button id="previewBtn">양력 변환 및 미리보기</button>
+        <button id="syncBtn" style="background-color: #4285f4; color: white; border: none;">구글 캘린더 등록</button>
+        <button id="downloadIcsBtn" style="background-color: #34a853; color: white; border: none;">파일로 저장 (.ics)</button>
+        <span id="syncStatus" class="status-msg"></span>
+    </div>
 
-    <div id="previewList"></div>
+    <div id="previewList">등록될 날짜가 여기에 표시됩니다.</div>
 
     <div class="delete-section">
         <h3>일정 일괄 삭제</h3>
-        <input type="text" id="deleteKeyword" placeholder="검색 키워드 입력">
-        <button id="searchBtn">찾기</button>
+        <p style="font-size: 0.85em; color: #666;">등록된 일정을 키워드로 검색하여 한꺼번에 삭제할 수 있습니다.</p>
+        <input type="text" id="deleteKeyword" placeholder="검색어 입력">
+        <button id="searchBtn">일정 찾기</button>
         <div id="searchResultList"></div>
-        <button id="bulkDeleteBtn" style="display:none; background-color: #d93025; color: white; border: none;">일괄 삭제</button>
+        <button id="bulkDeleteBtn" style="display:none; background-color: #d93025; color: white; border: none;">검색 결과 모두 삭제</button>
         <span id="deleteStatus" class="status-msg" style="color: #d93025;"></span>
     </div>
 
