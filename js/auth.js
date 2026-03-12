@@ -1,80 +1,97 @@
+/* auth.js - 토큰 재사용 로직 적용 */
+let tokenClient;
 let gapiInited = false;
 let gisInited = false;
-let tokenClient;
 
-function gapiLoaded() { gapi.load('client', intializeGapiClient); }
+function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+}
 
-async function intializeGapiClient() {
-    const apiKey = document.getElementById('apiKey').value || localStorage.getItem('google_api_key');
-    if (!apiKey) return;
-    try {
-        await gapi.client.init({
-            apiKey: apiKey,
-            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-        });
-        gapiInited = true;
-    } catch (e) { console.error("GAPI 초기화 실패", e); }
+async function initializeGapiClient() {
+    const apiKey = localStorage.getItem('google_api_key');
+    await gapi.client.init({
+        apiKey: apiKey,
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+    });
+    gapiInited = true;
 }
 
 function gisLoaded() {
-    const clientId = document.getElementById('clientId').value || localStorage.getItem('google_client_id');
-    if (!clientId) return;
+    const clientId = localStorage.getItem('google_client_id');
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/calendar.events',
-        callback: '', 
+        scope: 'https://www.googleapis.com/auth/calendar',
+        callback: '', // main.js에서 실행 시 결정
     });
     gisInited = true;
 }
 
-// 공통 인증 체크 함수
-async function ensureAuthenticated() {
-    if (!gapiInited) await intializeGapiClient();
-    if (!gisInited) gisLoaded();
-
-    return new Promise((resolve) => {
-        if (gapi.client.getToken() === null) {
-            tokenClient.callback = (resp) => {
-                if (resp.error !== undefined) throw (resp);
-                resolve(true);
-            };
-            tokenClient.requestAccessToken({prompt: 'consent'});
-        } else {
-            resolve(true);
-        }
-    });
+/**
+ * 인증 토큰을 가져오는 핵심 함수
+ * 이미 토큰이 있으면 로그인 창을 띄우지 않음
+ */
+function getAccessToken(callback) {
+    // 이미 토큰이 유효한지 체크
+    const token = gapi.client.getToken();
+    if (token) {
+        callback(token);
+    } else {
+        // 토큰이 없거나 만료된 경우에만 로그인 창 표시
+        tokenClient.callback = (resp) => {
+            if (resp.error) throw resp;
+            callback(gapi.client.getToken());
+        };
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
 }
 
+// 일정 등록 함수
 async function addEventsToCalendar(title, description, dates) {
-    await ensureAuthenticated();
-    for (const date of dates) {
-        await gapi.client.calendar.events.insert({
-            'calendarId': 'primary',
-            'resource': {
+    getAccessToken(async () => {
+        for (const date of dates) {
+            const event = {
                 'summary': title,
                 'description': description,
                 'start': { 'date': date },
                 'end': { 'date': date }
-            },
-        });
-    }
-    alert(dates.length + "개의 일정이 등록되었습니다!");
-}
-
-async function searchEvents(keyword) {
-    await ensureAuthenticated(); // 검색 전 인증 확인
-    const response = await gapi.client.calendar.events.list({
-        'calendarId': 'primary',
-        'q': keyword,
-        'singleEvents': true
+            };
+            await gapi.client.calendar.events.insert({
+                'calendarId': 'primary',
+                'resource': event
+            });
+        }
+        alert("모든 일정이 등록되었습니다.");
     });
-    return response.result.items || [];
 }
 
+// 일정 검색 함수
+async function searchEvents(keyword) {
+    return new Promise((resolve) => {
+        getAccessToken(async () => {
+            const response = await gapi.client.calendar.events.list({
+                'calendarId': 'primary',
+                'q': keyword,
+                'timeMin': (new Date()).toISOString(),
+                'showDeleted': false,
+                'singleEvents': true
+            });
+            resolve(response.result.items);
+        });
+    });
+}
+
+// 일정 삭제 함수
 async function deleteEvents(eventIds) {
-    if (!confirm(eventIds.length + "개의 일정을 삭제하시겠습니까?")) return;
-    for (const id of eventIds) {
-        await gapi.client.calendar.events.delete({ 'calendarId': 'primary', 'eventId': id });
-    }
-    alert("삭제가 완료되었습니다.");
+    return new Promise((resolve) => {
+        getAccessToken(async () => {
+            for (const id of eventIds) {
+                await gapi.client.calendar.events.delete({
+                    'calendarId': 'primary',
+                    'eventId': id
+                });
+            }
+            alert("일괄 삭제 완료");
+            resolve();
+        });
+    });
 }
