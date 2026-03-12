@@ -10,7 +10,7 @@
         .helper-links a { color: #1a73e8; text-decoration: none; margin-right: 10px; }
         label { display: inline-block; width: 140px; }
         input[type="text"], input[type="password"], input[type="number"] { padding: 5px; width: 250px; }
-        .date-input { width: 60px !important; }
+        .date-input { width: 80px !important; }
         button { padding: 8px 12px; cursor: pointer; margin-right: 5px; }
         #previewList { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; }
         .delete-section { margin-top: 40px; padding: 20px; border: 1px solid #ccc; background: #fff8f8; }
@@ -42,13 +42,13 @@
 
     <div class="input-group">
         <label>일정 제목</label>
-        <input type="text" id="eventTitle">
+        <input type="text" id="eventTitle" value="" placeholder="일정 제목 입력">
     </div>
     <div class="input-group">
         <label>음력 날짜</label>
-        <input type="number" id="lunarYear" class="date-input" style="width: 80px !important;">
-        <input type="number" id="lunarMonth" class="date-input" min="1" max="12">
-        <input type="number" id="lunarDay" class="date-input" min="1" max="31">
+        <input type="number" id="lunarYear" class="date-input" placeholder="연도">
+        <input type="number" id="lunarMonth" class="date-input" min="1" max="12" placeholder="월" style="width: 60px !important;">
+        <input type="number" id="lunarDay" class="date-input" min="1" max="31" placeholder="일" style="width: 60px !important;">
         <label style="width: auto; margin-left: 10px;"><input type="checkbox" id="isLeap"> 윤달</label>
     </div>
     <div class="input-group">
