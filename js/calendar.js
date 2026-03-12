@@ -1,16 +1,17 @@
 function getSolarDates(year, month, day, isLeap, count) {
     const dates = [];
     
-    // 라이브러리 로드 확인
-    if (typeof koreanLunarCalendar === 'undefined') {
-        alert("음력 변환 라이브러리가 로드되지 않았습니다. 순서를 확인하세요.");
+    // 라이브러리가 전역(window)에 로드되었는지 더 정확하게 확인
+    const LunarLib = window.koreanLunarCalendar;
+
+    if (!LunarLib) {
+        alert("음력 변환 라이브러리를 아직 불러오는 중이거나 실패했습니다. 잠시 후 다시 시도해주세요.");
         return [];
     }
 
-    const lunar = new koreanLunarCalendar();
+    const lunar = new LunarLib();
 
     for (let i = 0; i < count; i++) {
-        // 입력받은 연도에 i를 더해 매년 음력을 양력으로 계산
         const currentYear = Number(year) + i;
         const currentMonth = Number(month);
         const currentDay = Number(day);
